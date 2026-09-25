@@ -2,13 +2,13 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5001;
 
 app.use(cors());
 app.use(express.json());
 
 // Look up a Pokémon type by its ID or name.
-// Example: http://localhost:3000/api/type/fire
+// Example: http://localhost:5001/api/type/fire
 app.get('/api/type/:idOrName', async (req, res) => {
   const { idOrName } = req.params;
 

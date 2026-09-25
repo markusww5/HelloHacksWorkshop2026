@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 
 const types = [
   { name: 'Fire', color: 'border-orange-200 bg-orange-50 text-orange-800 hover:bg-orange-100' },
@@ -9,33 +9,46 @@ const types = [
 
 function App() {
   const [selectedType, setSelectedType] = useState('')
-  function getMatchup(type) {
-  // API CALL WILL GO HERE, AND WE WILL RETURN THE RESPONSE
-  return `Fake API response: You are fighting a ${type}-type Pokémon.`;
-}
+  async function getMatchup(type) {
+    try {
+      const response = await fetch(`http://localhost:5001/api/type/${encodeURIComponent(type.toLowerCase())}`)
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`)
+      }
+      const matchup = await response.json()
+      return [
+        `Moves of this type deal half damage to: ${matchup.half_damage_to.join(', ')}.`,
+        `This type takes double damage from: ${matchup.double_damage_from.join(', ')}.`,
+      ].join('\n')
+    } catch (error) {
+      console.error('Could not get the type matchup:', error)
+      return 'Could not load the type matchup. Please try again.'
+    }
+  }
 
-function handleTypeClick(type) {
-  const response = getMatchup(type);
-  setSelectedType(response);
-}
+  async function handleTypeClick(type) {
+    const response = await getMatchup(type)
+    setSelectedType(response)
+  }
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-amber-50 px-4 py-10 text-slate-800">
       <section className="w-full max-w-lg rounded-3xl border-4 border-slate-800 bg-white p-7 shadow-[0_8px_0_#1e293b] sm:p-10">
         <div className="mb-7 flex items-center gap-3">
           <span aria-hidden="true" className="grid size-12 place-items-center rounded-full border-4 border-slate-800 bg-red-500 text-xl text-white">
-            ★
+            â˜…
           </span>
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">Pokémon Battle Assistant</p>
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">PokÃ©mon Battle Assistant</p>
         </div>
 
-        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Choose your opponent’s type</h1>
+        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Choose your opponentâ€™s type</h1>
         <p className="mt-3 text-slate-600">Pick a type to get ready for battle.</p>
 
         <div className="mt-7 grid grid-cols-2 gap-3">
           {types.map(({ name, color }) => (
             <button
               className={`rounded-xl border-2 px-4 py-3 font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800 ${color}`}
-              onClick={() => handleTypeClick(types.name)}
+              onClick={() => handleTypeClick(name)}
               key={name}
               type="button"
             >
@@ -44,7 +57,7 @@ function handleTypeClick(type) {
           ))}
         </div>
 
-        {selectedType && <p className="mt-5 text-center font-semibold">{selectedType}</p>}
+        {selectedType && <p className="mt-5 whitespace-pre-line text-center font-semibold">{selectedType}</p>}
       </section>
     </main>
   )
